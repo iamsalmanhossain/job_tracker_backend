@@ -1,0 +1,27 @@
+model User {
+  id         String  @id @default(uuid())
+  email      String  @unique
+  password   String? // Optional for users who sign up via Google
+  googleId   String? @unique
+  name       String?
+  isVerified Boolean @default(false) // For email verification
+
+  sessions Session[]
+  profile  Profile?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Profile {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  avatarUrl   String?
+  bio         String?
+  phoneNumber String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

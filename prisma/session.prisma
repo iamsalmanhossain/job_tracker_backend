@@ -1,0 +1,12 @@
+model Session {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  refreshToken String?  @unique // Used to refresh access tokens
+  deviceInfo   String? // E.g., Browser/OS to manage specific device logins
+  ipAddress    String?
+  expiresAt    DateTime
+
+  createdAt DateTime @default(now())
+}
