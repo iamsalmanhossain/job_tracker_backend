@@ -1,0 +1,44 @@
+model JobApplication {
+  id             String            @id @default(uuid())
+  userId         String
+  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  resumeId       String?
+  resume         Resume?           @relation(fields: [resumeId], references: [id], onDelete: SetNull)
+
+  companyName    String
+  companyLogo    String?
+  jobTitle       String
+  jobType        JobType?
+  location       String?
+  isRemote       Boolean           @default(false)
+  salaryMin      Decimal?          @db.Decimal(10, 2)
+  salaryMax      Decimal?          @db.Decimal(10, 2)
+  salaryCurrency String?
+  jobUrl         String?
+  source         ApplicationSource?
+  status         JobStatus         @default(WISHLIST)
+  priority       Priority          @default(MEDIUM)
+  isFavorite     Boolean           @default(false)
+  description    String?           @db.Text
+  requirements   String?           @db.Text
+  
+  appliedAt      DateTime?
+  deadline       DateTime?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  interviews     Interview[]
+  notes          Note[]
+  followUps      FollowUp[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([priority])
+  @@index([source])
+  @@index([jobType])
+  @@index([companyName])
+  @@index([createdAt])
+  @@index([deadline])
+  @@index([isFavorite])
+}
