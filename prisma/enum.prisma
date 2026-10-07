@@ -1,0 +1,110 @@
+enum Role {
+  USER
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+  SUSPENDED
+}
+
+enum JobStatus {
+  WISHLIST
+  APPLIED
+  SCREENING
+  INTERVIEW
+  OFFER
+  REJECTED
+  WITHDRAWN
+}
+
+enum JobType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERNSHIP
+  FREELANCE
+  REMOTE
+}
+
+enum ApplicationSource {
+  LINKEDIN
+  INDEED
+  BDJOBS
+  COMPANY_WEBSITE
+  REFERRAL
+  FACEBOOK
+  OTHER
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum InterviewType {
+  PHONE
+  VIDEO
+  TECHNICAL
+  HR
+  ONSITE
+  FINAL
+  OTHER
+}
+
+enum InterviewStatus {
+  SCHEDULED
+  COMPLETED
+  PASSED
+  FAILED
+  CANCELLED
+  RESCHEDULED
+}
+
+enum FollowUpStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
+enum NotificationType {
+  INTERVIEW
+  FOLLOW_UP
+  DEADLINE
+  APPLICATION
+  SYSTEM
+}
+
+enum AuditAction {
+  LOGIN
+  LOGOUT
+  CREATE
+  UPDATE
+  DELETE
+  BLOCK_USER
+  UNBLOCK_USER
+  CHANGE_ROLE
+  CHANGE_STATUS
+  CREATE_APPLICATION
+  UPDATE_APPLICATION
+  DELETE_APPLICATION
+}
+
+enum AuditEntity {
+  USER
+  PROFILE
+  APPLICATION
+  INTERVIEW
+  NOTE
+  FOLLOW_UP
+  RESUME
+  SYSTEM
+}
+
+enum FileType {
+  IMAGE
+  DOCUMENT
+  OTHER
+}
