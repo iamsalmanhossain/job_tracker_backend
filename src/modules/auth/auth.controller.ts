@@ -25,7 +25,15 @@ const verifyEmail = catchAsync(async (req: Request, res: Response) => {
 });
 
 const login = catchAsync(async (req: Request, res: Response) => {
-  const result = await authService.login(req.body);
+  const ipAddress = req.ip || req.socket.remoteAddress;
+  const userAgent = req.headers['user-agent'];
+
+  const result = await authService.login({
+    ...req.body,
+    ipAddress,
+    userAgent
+  });
+
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -65,7 +73,8 @@ const logout = catchAsync(async (req: Request, res: Response) => {
 });
 
 const logoutAll = catchAsync(async (req: Request, res: Response) => {
-  const result = await authService.logoutAll(req.body.userId);
+  const userId = (req as any).user.id;
+  const result = await authService.logoutAll(userId);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -75,12 +84,35 @@ const logoutAll = catchAsync(async (req: Request, res: Response) => {
 });
 
 const updateProfile = catchAsync(async (req: Request, res: Response) => {
-  const result = await authService.updateProfile(req.body.userId, req.body);
+  const userId = (req as any).user.id;
+  const result = await authService.updateProfile(userId, req.body);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
     message: 'Profile updated successfully',
     data: result,
+  });
+});
+
+const getProfile = catchAsync(async (req: Request, res: Response) => {
+  const userId = (req as any).user.id;
+  const result = await authService.getProfile(userId);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Profile retrieved successfully',
+    data: result,
+  });
+});
+
+const deleteProfile = catchAsync(async (req: Request, res: Response) => {
+  const userId = (req as any).user.id;
+  const result = await authService.deleteProfile(userId);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: result.message,
+    data: null,
   });
 });
 
@@ -93,4 +125,6 @@ export const authController = {
   logout,
   logoutAll,
   updateProfile,
+  getProfile,
+  deleteProfile,
 };
