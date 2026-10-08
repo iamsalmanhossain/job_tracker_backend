@@ -6,6 +6,9 @@ import { jobApplicationRoutes } from '../modules/job-application/job-application
 import { resumeRoutes } from '../modules/resume/resume.route.js';
 import { interviewRoutes } from '../modules/interview/interview.route.js';
 import { noteRoutes } from '../modules/note/note.route.js';
+import { followUpRoutes } from '../modules/follow-up/follow-up.route.js';
+import { notificationRoutes } from '../modules/notification/notification.route.js';
+import { dashboardRoutes } from '../modules/dashboard/dashboard.route.js';
 
 const router:Router = express.Router();
 
@@ -33,6 +36,18 @@ const moduleRoutes = [
   {
     path: '/notes',
     route: noteRoutes,
+  },
+  {
+    path: '/follow-ups',
+    route: followUpRoutes,
+  },
+  {
+    path: '/notifications',
+    route: notificationRoutes,
+  },
+  {
+    path: '/dashboard',
+    route: dashboardRoutes,
   },
 ];
 
