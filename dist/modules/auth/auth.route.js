@@ -9,8 +9,11 @@ router.post('/login', authRateLimiter, validateRequest(authValidation.login), au
 router.post('/verify-email', validateRequest(authValidation.verifyEmail), authController.verifyEmail);
 router.post('/forgot-password', authRateLimiter, validateRequest(authValidation.forgotPassword), authController.forgotPassword);
 router.post('/reset-password', validateRequest(authValidation.resetPassword), authController.resetPassword);
-router.post('/logout', authController.logout);
-router.post('/logout-all', authController.logoutAll);
-router.patch('/profile', validateRequest(authValidation.updateProfile), authController.updateProfile);
+import { auth } from '../../middleware/auth.js';
+router.post('/logout', auth(), authController.logout);
+router.post('/logout-all', auth(), authController.logoutAll);
+router.get('/profile', auth(), authController.getProfile);
+router.patch('/profile', auth(), validateRequest(authValidation.updateProfile), authController.updateProfile);
+router.delete('/profile', auth(), authController.deleteProfile);
 export const authRoutes = router;
 //# sourceMappingURL=auth.route.js.map

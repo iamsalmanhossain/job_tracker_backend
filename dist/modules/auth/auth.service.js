@@ -26,8 +26,8 @@ const register = async (data) => {
             name: true,
         }
     });
-    // Generate Redis OTP and send real email
-    const otp = await generateOtp(user.email, 'verify_email');
+    // Generate Redis OTP (2 minutes expiry) and send real email
+    const otp = await generateOtp(user.email, 'verify_email', 120);
     await sendEmail(user.email, 'Verify your email address', emailTemplates.verificationEmail(otp));
     return { user };
 };
@@ -38,8 +38,8 @@ const verifyEmail = async (email, otp) => {
     }
     const user = await prisma.user.update({
         where: { email },
-        data: { isVerified: true },
-        // select: { isVerified: true }
+        data: { emailVerified: true },
+        // select: { emailVerified: true }
     });
     return { message: 'Email verified successfully', user };
 };
@@ -52,7 +52,7 @@ const login = async (data) => {
     if (!isMatch) {
         throw new AppError(httpStatus.UNAUTHORIZED, 'Invalid credentials');
     }
-    if (!user.isVerified) {
+    if (!user.emailVerified) {
         throw new AppError(httpStatus.FORBIDDEN, 'Please verify your email first');
     }
     const accessToken = generateToken({ userId: user.id }, env.JWT_SECRET, env.JWT_EXPIRES_IN);
@@ -62,7 +62,8 @@ const login = async (data) => {
         data: {
             userId: user.id,
             refreshToken,
-            deviceInfo: data.deviceInfo ?? null,
+            ipAddress: data.ipAddress ?? null,
+            userAgent: data.userAgent ?? null,
             expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // 7 days
         },
         select: { id: true }
@@ -73,11 +74,11 @@ const forgotPassword = async (email) => {
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
         // Don't leak user existence
-        return { message: 'If an account exists, a reset link has been sent' };
+        return { message: 'OTP sent successfully' };
     }
-    const otp = await generateOtp(email, 'reset_password');
+    const otp = await generateOtp(email, 'reset_password', 120);
     await sendEmail(email, 'Reset your password', emailTemplates.passwordResetEmail(otp));
-    return { message: 'If an account exists, a reset link has been sent' };
+    return { message: 'OTP sent successfully' };
 };
 const resetPassword = async (data) => {
     const isValid = await verifyOtp(data.email, data.otp, 'reset_password');
@@ -112,24 +113,83 @@ const updateProfile = async (userId, data) => {
     const profile = await prisma.profile.update({
         where: { userId },
         data: {
-            ...(data.avatarUrl !== undefined && { avatarUrl: data.avatarUrl }),
+            ...(data.phone !== undefined && { phone: data.phone }),
+            ...(data.location !== undefined && { location: data.location }),
             ...(data.bio !== undefined && { bio: data.bio }),
-            ...(data.phoneNumber !== undefined && { phoneNumber: data.phoneNumber }),
+            ...(data.headline !== undefined && { headline: data.headline }),
+            ...(data.website !== undefined && { website: data.website }),
+            ...(data.linkedinUrl !== undefined && { linkedinUrl: data.linkedinUrl }),
+            ...(data.githubUrl !== undefined && { githubUrl: data.githubUrl }),
+            ...(data.skills !== undefined && { skills: data.skills }),
         },
         select: {
-            avatarUrl: true,
+            phone: true,
+            location: true,
             bio: true,
-            phoneNumber: true,
+            headline: true,
+            website: true,
+            linkedinUrl: true,
+            githubUrl: true,
+            skills: true,
             updatedAt: true,
         }
     });
-    if (data.name) {
+    if (data.name !== undefined || data.profileImage !== undefined) {
         await prisma.user.update({
             where: { id: userId },
-            data: { name: data.name },
+            data: {
+                ...(data.name !== undefined && { name: data.name }),
+                ...(data.profileImage !== undefined && { profileImage: data.profileImage }),
+            },
         });
     }
     return profile;
+};
+const getProfile = async (userId) => {
+    if (!userId) {
+        throw new AppError(httpStatus.BAD_REQUEST, 'User ID is required to get profile');
+    }
+    const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+            id: true,
+            name: true,
+            email: true,
+            profileImage: true,
+            role: true,
+            status: true,
+            emailVerified: true,
+            createdAt: true,
+            isDeleted: true,
+            profile: true,
+        }
+    });
+    if (!user || user.isDeleted) {
+        throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+    }
+    // Remove isDeleted from response
+    const { isDeleted, ...userProfile } = user;
+    return userProfile;
+};
+const deleteProfile = async (userId) => {
+    if (!userId) {
+        throw new AppError(httpStatus.BAD_REQUEST, 'User ID is required to delete profile');
+    }
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user || user.isDeleted) {
+        throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+    }
+    // Soft delete user
+    await prisma.$transaction([
+        prisma.user.update({
+            where: { id: userId },
+            data: { isDeleted: true, deletedAt: new Date(), status: 'SUSPENDED' }
+        }),
+        prisma.session.deleteMany({
+            where: { userId }
+        })
+    ]);
+    return { message: 'Profile deleted successfully' };
 };
 export const authService = {
     register,
@@ -140,5 +200,7 @@ export const authService = {
     logout,
     logoutAll,
     updateProfile,
+    getProfile,
+    deleteProfile,
 };
 //# sourceMappingURL=auth.service.js.map

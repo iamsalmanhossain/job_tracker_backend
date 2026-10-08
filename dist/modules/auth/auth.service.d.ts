@@ -10,16 +10,24 @@ declare const verifyEmail: (email: string, otp: string) => Promise<{
     message: string;
     user: {
         id: string;
+        name: string | null;
         email: string;
         password: string | null;
-        googleId: string | null;
-        name: string | null;
-        isVerified: boolean;
+        profileImage: string | null;
+        role: import("@prisma/client").$Enums.Role;
+        status: import("@prisma/client").$Enums.UserStatus;
+        emailVerified: boolean;
+        lastLoginAt: Date | null;
+        isDeleted: boolean;
+        deletedAt: Date | null;
         createdAt: Date;
         updatedAt: Date;
     };
 }>;
-declare const login: (data: TLogin) => Promise<{
+declare const login: (data: TLogin & {
+    ipAddress?: string;
+    userAgent?: string;
+}) => Promise<{
     user: {
         id: string;
         email: string;
@@ -41,10 +49,42 @@ declare const logoutAll: (userId: string) => Promise<{
     message: string;
 }>;
 declare const updateProfile: (userId: string, data: TUpdateProfile) => Promise<{
-    avatarUrl: string | null;
     bio: string | null;
-    phoneNumber: string | null;
+    githubUrl: string | null;
+    headline: string | null;
+    linkedinUrl: string | null;
+    location: string | null;
+    phone: string | null;
+    skills: string | null;
     updatedAt: Date;
+    website: string | null;
+}>;
+declare const getProfile: (userId: string) => Promise<{
+    createdAt: Date;
+    email: string;
+    emailVerified: boolean;
+    id: string;
+    name: string | null;
+    profile: {
+        id: string;
+        userId: string;
+        phone: string | null;
+        location: string | null;
+        bio: string | null;
+        headline: string | null;
+        website: string | null;
+        linkedinUrl: string | null;
+        githubUrl: string | null;
+        skills: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+    } | null;
+    profileImage: string | null;
+    role: import("@prisma/client").$Enums.Role;
+    status: import("@prisma/client").$Enums.UserStatus;
+}>;
+declare const deleteProfile: (userId: string) => Promise<{
+    message: string;
 }>;
 export declare const authService: {
     register: typeof register;
@@ -55,6 +95,8 @@ export declare const authService: {
     logout: typeof logout;
     logoutAll: typeof logoutAll;
     updateProfile: typeof updateProfile;
+    getProfile: typeof getProfile;
+    deleteProfile: typeof deleteProfile;
 };
 export {};
 //# sourceMappingURL=auth.service.d.ts.map

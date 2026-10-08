@@ -8,5 +8,7 @@ export declare const authController: {
     logout: (req: Request, res: Response, next: import("express").NextFunction) => void;
     logoutAll: (req: Request, res: Response, next: import("express").NextFunction) => void;
     updateProfile: (req: Request, res: Response, next: import("express").NextFunction) => void;
+    getProfile: (req: Request, res: Response, next: import("express").NextFunction) => void;
+    deleteProfile: (req: Request, res: Response, next: import("express").NextFunction) => void;
 };
 //# sourceMappingURL=auth.controller.d.ts.map

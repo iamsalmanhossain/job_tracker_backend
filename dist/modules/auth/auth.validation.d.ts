@@ -8,7 +8,6 @@ export declare const authValidation: {
     login: z.ZodObject<{
         email: z.ZodString;
         password: z.ZodString;
-        deviceInfo: z.ZodOptional<z.ZodString>;
     }, z.core.$strip>;
     verifyEmail: z.ZodObject<{
         otp: z.ZodString;
@@ -24,9 +23,15 @@ export declare const authValidation: {
     }, z.core.$strip>;
     updateProfile: z.ZodObject<{
         name: z.ZodOptional<z.ZodString>;
-        avatarUrl: z.ZodOptional<z.ZodString>;
+        profileImage: z.ZodOptional<z.ZodString>;
+        phone: z.ZodOptional<z.ZodString>;
+        location: z.ZodOptional<z.ZodString>;
         bio: z.ZodOptional<z.ZodString>;
-        phoneNumber: z.ZodOptional<z.ZodString>;
+        headline: z.ZodOptional<z.ZodString>;
+        website: z.ZodOptional<z.ZodString>;
+        linkedinUrl: z.ZodOptional<z.ZodString>;
+        githubUrl: z.ZodOptional<z.ZodString>;
+        skills: z.ZodOptional<z.ZodString>;
     }, z.core.$strip>;
 };
 export type TRegister = z.infer<typeof authValidation.register>;
