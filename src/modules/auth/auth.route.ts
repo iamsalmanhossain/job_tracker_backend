@@ -39,20 +39,37 @@ router.post(
   authController.resetPassword
 );
 
+import { auth } from '../../middleware/auth.js';
+
 router.post(
   '/logout',
+  auth(),
   authController.logout
 );
 
 router.post(
   '/logout-all',
+  auth(),
   authController.logoutAll
+);
+
+router.get(
+  '/profile',
+  auth(),
+  authController.getProfile
 );
 
 router.patch(
   '/profile',
+  auth(),
   validateRequest(authValidation.updateProfile),
   authController.updateProfile
+);
+
+router.delete(
+  '/profile',
+  auth(),
+  authController.deleteProfile
 );
 
 export const authRoutes = router;
