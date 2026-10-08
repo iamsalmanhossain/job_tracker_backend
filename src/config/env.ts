@@ -14,6 +14,11 @@ export const env = {
     SMTP_USER: process.env.SMTP_USER || '',
     SMTP_PASS: process.env.SMTP_PASS || '',
     EMAIL_FROM: process.env.EMAIL_FROM || 'noreply@example.com',
+    
+    // Cloudinary Config
+    CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME || '',
+    CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY || '',
+    CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET || '',
 }
 
 if (!env.DATABASE_URL || !env.PORT || !env.JWT_SECRET || !env.REDIS_URL) {
