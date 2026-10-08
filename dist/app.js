@@ -19,8 +19,11 @@ app.use(compression());
 app.use(globalRateLimiter);
 // Root Route
 app.get('/', (req, res) => {
-    res.json({ success: true, message: 'Biponiq API is running!' });
+    res.json({ success: true, message: 'Job Tracker API is running!' });
 });
+// Application Routes
+import router from './routes/index.js';
+app.use('/api/v1', router);
 // Use Global Error Handler
 app.use(globalErrorHandler);
 // Not Found Route

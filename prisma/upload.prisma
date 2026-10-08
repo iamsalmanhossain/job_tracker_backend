@@ -1,0 +1,17 @@
+model Upload {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  url              String
+  publicId         String
+  originalFilename String?
+  format           String?  // e.g., 'png', 'pdf', 'jpg'
+  size             Int?     // Size in bytes
+  resourceType     String?  // 'image', 'video', 'raw' from Cloudinary
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}

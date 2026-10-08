@@ -1,12 +1,16 @@
 model Session {
-  id     String @id @default(uuid())
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  refreshToken String?  @unique // Used to refresh access tokens
-  deviceInfo   String? // E.g., Browser/OS to manage specific device logins
-  ipAddress    String?
+  refreshToken String   @unique
   expiresAt    DateTime
+  ipAddress    String?
+  userAgent    String?
 
-  createdAt DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([userId])
+  @@index([expiresAt])
 }

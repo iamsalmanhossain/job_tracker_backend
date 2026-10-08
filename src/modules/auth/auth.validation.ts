@@ -9,7 +9,6 @@ export const authValidation = {
   login: z.object({
     email: z.string(),
     password: z.string(),
-    deviceInfo: z.string().optional(),
   }),
   verifyEmail: z.object({
     otp: z.string(),
@@ -25,9 +24,15 @@ export const authValidation = {
   }),
   updateProfile: z.object({
     name: z.string().optional(),
-    avatarUrl: z.string().optional(),
+    profileImage: z.string().optional(),
+    phone: z.string().optional(),
+    location: z.string().optional(),
     bio: z.string().optional(),
-    phoneNumber: z.string().optional(),
+    headline: z.string().optional(),
+    website: z.string().optional(),
+    linkedinUrl: z.string().optional(),
+    githubUrl: z.string().optional(),
+    skills: z.string().optional(),
   }),
 };
 

@@ -3,12 +3,7 @@ import httpStatus from 'http-status';
 export const validateRequest = (schema) => {
     return async (req, res, next) => {
         try {
-            await schema.parseAsync({
-                body: req.body,
-                query: req.query,
-                params: req.params,
-                cookies: req.cookies,
-            });
+            await schema.parseAsync(req.body);
             next();
         }
         catch (error) {
