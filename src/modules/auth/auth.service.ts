@@ -5,8 +5,103 @@ import httpStatus from 'http-status';
 import { AppError } from '../../shared/AppError.js';
 import { generateOtp, verifyOtp } from '../../shared/otp.service.js';
 import { sendEmail, emailTemplates } from '../../shared/email.service.js';
-import type { TLogin, TRegister, TResetPassword, TUpdateProfile } from './auth.validation.js';
+import { OAuth2Client } from 'google-auth-library';
+import type { TLogin, TRegister, TResetPassword, TUpdateProfile, TGoogleLogin } from './auth.validation.js';
 
+import { auditLogService } from '../audit-log/audit-log.service.js';
+
+const googleClient = new OAuth2Client(env.GOOGLE_CLIENT_ID);
+
+const googleLogin = async (data: TGoogleLogin & { ipAddress?: string; userAgent?: string }) => {
+  const ticket = await googleClient.verifyIdToken({
+    idToken: data.idToken,
+    audience: env.GOOGLE_CLIENT_ID,
+  });
+
+  const payload = ticket.getPayload();
+  if (!payload || !payload.email) {
+    throw new AppError(httpStatus.UNAUTHORIZED, 'Invalid Google token');
+  }
+
+  const { email, name, picture, sub: googleId } = payload;
+
+  let user = await prisma.user.findUnique({ where: { email } });
+
+  if (!user) {
+    // Create new user if they don't exist
+    user = await prisma.user.create({
+      data: {
+        email,
+        name: name || null,
+        profileImage: picture || null,
+        emailVerified: true,
+        profile: {
+          create: {}
+        },
+        accounts: {
+          create: {
+            provider: 'google',
+            providerAccountId: googleId,
+          }
+        }
+      }
+    });
+  } else {
+    // Check if account is linked
+    const existingAccount = await prisma.account.findUnique({
+      where: {
+        provider_providerAccountId: {
+          provider: 'google',
+          providerAccountId: googleId,
+        }
+      }
+    });
+
+    if (!existingAccount) {
+      await prisma.account.create({
+        data: {
+          userId: user.id,
+          provider: 'google',
+          providerAccountId: googleId,
+        }
+      });
+    }
+
+    if (!user.emailVerified) {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { emailVerified: true }
+      });
+    }
+  }
+
+  const accessToken = generateToken({ userId: user.id }, env.JWT_SECRET, env.JWT_EXPIRES_IN);
+  const refreshToken = generateToken({ userId: user.id }, env.JWT_REFRESH_SECRET, env.JWT_REFRESH_EXPIRES_IN);
+
+  // Session Management
+  await prisma.session.create({
+    data: {
+      userId: user.id,
+      refreshToken,
+      ipAddress: data.ipAddress ?? null,
+      userAgent: data.userAgent ?? null,
+      expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // 7 days
+    }
+  });
+
+  // Audit Log
+  auditLogService.createAuditLog({
+    userId: user.id,
+    action: 'LOGIN',
+    entity: 'USER',
+    entityId: user.id,
+    description: 'User logged in with Google',
+    ipAddress: data.ipAddress,
+    userAgent: data.userAgent,
+  });
+
+  return { user: { id: user.id, email: user.email, name: user.name, profileImage: user.profileImage }, accessToken, refreshToken };
+};
 
 const register = async (data: TRegister) => {
   const existingUser = await prisma.user.findUnique({ where: { email: data.email } });
@@ -83,6 +178,17 @@ const login = async (data: TLogin & { ipAddress?: string; userAgent?: string }) 
       expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // 7 days
     },
     select: { id: true }
+  });
+
+  // Audit Log
+  auditLogService.createAuditLog({
+    userId: user.id,
+    action: 'LOGIN',
+    entity: 'USER',
+    entityId: user.id,
+    description: 'User logged in',
+    ipAddress: data.ipAddress,
+    userAgent: data.userAgent,
   });
 
   return {  user: { id: user.id, email: user.email, name: user.name }, accessToken, refreshToken };
@@ -235,6 +341,7 @@ export const authService = {
   register,
   verifyEmail,
   login,
+  googleLogin,
   forgotPassword,
   resetPassword,
   logout,
