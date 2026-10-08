@@ -42,6 +42,24 @@ const login = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const googleLogin = catchAsync(async (req: Request, res: Response) => {
+  const ipAddress = req.ip || req.socket.remoteAddress;
+  const userAgent = req.headers['user-agent'];
+
+  const result = await authService.googleLogin({
+    ...req.body,
+    ipAddress,
+    userAgent
+  });
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'User logged in with Google successfully',
+    data: result,
+  });
+});
+
 const forgotPassword = catchAsync(async (req: Request, res: Response) => {
   const result = await authService.forgotPassword(req.body.email);
   sendResponse(res, {
@@ -120,6 +138,7 @@ export const authController = {
   register,
   verifyEmail,
   login,
+  googleLogin,
   forgotPassword,
   resetPassword,
   logout,

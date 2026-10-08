@@ -10,6 +10,9 @@ export const authValidation = {
     email: z.string(),
     password: z.string(),
   }),
+  googleLogin: z.object({
+    idToken: z.string(),
+  }),
   verifyEmail: z.object({
     otp: z.string(),
     email: z.string(),
@@ -42,3 +45,4 @@ export type TVerifyEmail = z.infer<typeof authValidation.verifyEmail>;
 export type TForgotPassword = z.infer<typeof authValidation.forgotPassword>;
 export type TResetPassword = z.infer<typeof authValidation.resetPassword>;
 export type TUpdateProfile = z.infer<typeof authValidation.updateProfile>;
+export type TGoogleLogin = z.infer<typeof authValidation.googleLogin>;

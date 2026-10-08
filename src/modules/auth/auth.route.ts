@@ -21,6 +21,13 @@ router.post(
 );
 
 router.post(
+  '/google-login',
+  authRateLimiter,
+  validateRequest(authValidation.googleLogin),
+  authController.googleLogin
+);
+
+router.post(
   '/verify-email',
   validateRequest(authValidation.verifyEmail),
   authController.verifyEmail
