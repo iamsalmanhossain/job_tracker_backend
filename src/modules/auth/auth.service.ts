@@ -337,6 +337,91 @@ const deleteProfile = async (userId: string) => {
   return { message: 'Profile deleted successfully' };
 };
 
+const createAdmin = async (data: TRegister, isSetup: boolean = false) => {
+  const adminCount = await prisma.user.count({
+    where: { role: 'ADMIN' }
+  });
+
+  if (isSetup && adminCount > 0) {
+    throw new AppError(httpStatus.FORBIDDEN, 'Admin already exists. Setup route is locked.');
+  }
+
+  const existingUser = await prisma.user.findUnique({ where: { email: data.email } });
+  if (existingUser) {
+    throw new AppError(httpStatus.CONFLICT, 'Email already in use');
+  }
+
+  const hashedPassword = await hashPassword(data.password);
+
+  const adminUser = await prisma.user.create({
+    data: {
+      email: data.email,
+      password: hashedPassword,
+      name: data.name ?? null,
+      role: 'ADMIN',
+      emailVerified: true, 
+      profile: {
+        create: {}
+      }
+    },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      role: true,
+      createdAt: true,
+    }
+  });
+
+  return adminUser;
+};
+
+const adminLogin = async (data: TLogin & { ipAddress?: string; userAgent?: string }) => {
+  const user = await prisma.user.findUnique({ where: { email: data.email } });
+  
+  if (!user || !user.password) {
+    throw new AppError(httpStatus.UNAUTHORIZED, 'Invalid credentials');
+  }
+
+  if (user.role !== 'ADMIN') {
+    throw new AppError(httpStatus.FORBIDDEN, 'Access denied. You do not have admin privileges.');
+  }
+
+  const isMatch = await comparePassword(data.password, user.password);
+  if (!isMatch) {
+    throw new AppError(httpStatus.UNAUTHORIZED, 'Invalid credentials');
+  }
+
+  const accessToken = generateToken({ userId: user.id }, env.JWT_SECRET, env.JWT_EXPIRES_IN);
+  const refreshToken = generateToken({ userId: user.id }, env.JWT_REFRESH_SECRET, env.JWT_REFRESH_EXPIRES_IN);
+
+  await prisma.session.create({
+    data: {
+      userId: user.id,
+      refreshToken,
+      ipAddress: data.ipAddress ?? null,
+      userAgent: data.userAgent ?? null,
+      expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), 
+    }
+  });
+
+  auditLogService.createAuditLog({
+    userId: user.id,
+    action: 'LOGIN',
+    entity: 'SYSTEM',
+    entityId: user.id,
+    description: 'Admin logged into the dashboard',
+    ipAddress: data.ipAddress,
+    userAgent: data.userAgent,
+  });
+
+  return {
+    admin: { id: user.id, email: user.email, name: user.name, role: user.role },
+    accessToken,
+    refreshToken
+  };
+};
+
 export const authService = {
   register,
   verifyEmail,
@@ -349,4 +434,6 @@ export const authService = {
   updateProfile,
   getProfile,
   deleteProfile,
+  createAdmin,
+  adminLogin,
 };

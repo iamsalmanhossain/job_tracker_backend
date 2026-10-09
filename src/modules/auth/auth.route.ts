@@ -79,4 +79,27 @@ router.delete(
   authController.deleteProfile
 );
 
+// --- ADMIN ROUTES ---
+
+router.post(
+  '/admin/setup',
+  authRateLimiter,
+  validateRequest(authValidation.register),
+  authController.setupAdmin
+);
+
+router.post(
+  '/admin/create-admin',
+  auth('ADMIN'),
+  validateRequest(authValidation.register),
+  authController.createAdmin
+);
+
+router.post(
+  '/admin/login',
+  authRateLimiter,
+  validateRequest(authValidation.login),
+  authController.adminLogin
+);
+
 export const authRoutes = router;
