@@ -4,6 +4,18 @@ import { catchAsync } from '../../shared/catchAsync.js';
 import { sendResponse } from '../../shared/sendResponse.js';
 import { notificationService } from './notification.service.js';
 
+const createNotification = catchAsync(async (req: Request, res: Response) => {
+  const userId = (req as any).user.id;
+  const result = await notificationService.createNotification(userId, req.body);
+
+  sendResponse(res, {
+    statusCode: httpStatus.CREATED,
+    success: true,
+    message: 'Notification created successfully',
+    data: result,
+  });
+});
+
 const getAllNotifications = catchAsync(async (req: Request, res: Response) => {
   const userId = (req as any).user.id;
   const result = await notificationService.getAllNotifications(userId, req.query);
@@ -55,6 +67,7 @@ const deleteNotification = catchAsync(async (req: Request, res: Response) => {
 });
 
 export const notificationController = {
+  createNotification,
   getAllNotifications,
   updateNotification,
   markAllAsRead,

@@ -6,6 +6,14 @@ import { notificationValidation } from './notification.validation.js';
 
 const router: Router = express.Router();
 
+// optional route just for postman testing
+router.post(
+  '/',
+  auth(),
+  validateRequest(notificationValidation.createNotification),
+  notificationController.createNotification
+);
+
 router.get(
   '/',
   auth(),
