@@ -1,7 +1,17 @@
 import prisma from '../../config/prisma.js';
 import { AppError } from '../../shared/AppError.js';
 import httpStatus from 'http-status';
-import type { TUpdateNotification } from './notification.validation.js';
+import type { TUpdateNotification, TCreateNotification } from './notification.validation.js';
+
+const createNotification = async (userId: string, payload: TCreateNotification) => {
+  const result = await prisma.notification.create({
+    data: {
+      userId,
+      ...payload,
+    },
+  });
+  return result;
+};
 
 // Get all notifications for a user
 const getAllNotifications = async (userId: string, query: any) => {
@@ -80,6 +90,7 @@ const deleteNotification = async (userId: string, notificationId: string) => {
 };
 
 export const notificationService = {
+  createNotification,
   getAllNotifications,
   updateNotification,
   markAllAsRead,

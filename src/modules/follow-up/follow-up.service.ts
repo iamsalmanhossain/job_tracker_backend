@@ -29,25 +29,42 @@ const createFollowUp = async (userId: string, payload: TCreateFollowUp) => {
 
 const getAllFollowUps = async (userId: string, query: any) => {
   const { applicationId, status } = query;
+  
+  const page = Number(query.page) || 1;
+  const limit = Number(query.limit) || 10;
+  const skip = (page - 1) * limit;
 
   const whereConditions: any = { userId };
   if (applicationId) whereConditions.applicationId = applicationId;
   if (status) whereConditions.status = status;
 
-  const result = await prisma.followUp.findMany({
-    where: whereConditions,
-    orderBy: { scheduledAt: 'asc' },
-    include: {
-      jobApplication: {
-        select: {
-          companyName: true,
-          jobTitle: true,
+  const [result, total] = await Promise.all([
+    prisma.followUp.findMany({
+      where: whereConditions,
+      orderBy: { scheduledAt: 'asc' },
+      skip,
+      take: limit,
+      include: {
+        jobApplication: {
+          select: {
+            companyName: true,
+            jobTitle: true,
+          }
         }
       }
-    }
-  });
+    }),
+    prisma.followUp.count({ where: whereConditions })
+  ]);
 
-  return result;
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    },
+    data: result
+  };
 };
 
 const updateFollowUp = async (userId: string, followUpId: string, payload: TUpdateFollowUp) => {

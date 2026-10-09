@@ -134,6 +134,44 @@ const deleteProfile = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const createAdmin = catchAsync(async (req: Request, res: Response) => {
+  const result = await authService.createAdmin(req.body, false);
+  sendResponse(res, {
+    statusCode: httpStatus.CREATED,
+    success: true,
+    message: 'Admin account created successfully',
+    data: result,
+  });
+});
+
+const setupAdmin = catchAsync(async (req: Request, res: Response) => {
+  const result = await authService.createAdmin(req.body, true);
+  sendResponse(res, {
+    statusCode: httpStatus.CREATED,
+    success: true,
+    message: 'First Admin account setup successfully',
+    data: result,
+  });
+});
+
+const adminLogin = catchAsync(async (req: Request, res: Response) => {
+  const ipAddress = req.ip || req.socket.remoteAddress;
+  const userAgent = req.headers['user-agent'];
+
+  const result = await authService.adminLogin({
+    ...req.body,
+    ipAddress,
+    userAgent
+  });
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Admin logged in successfully',
+    data: result,
+  });
+});
+
 export const authController = {
   register,
   verifyEmail,
@@ -146,4 +184,7 @@ export const authController = {
   updateProfile,
   getProfile,
   deleteProfile,
+  createAdmin,
+  setupAdmin,
+  adminLogin,
 };
