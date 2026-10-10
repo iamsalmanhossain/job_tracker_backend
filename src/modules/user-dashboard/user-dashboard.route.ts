@@ -1,5 +1,5 @@
 import express, { Router } from 'express';
-import { dashboardController } from './dashboard.controller.js';
+import { dashboardController } from './user-dashboard.controller.js';
 import { auth } from '../../middleware/auth.js';
 
 const router: Router = express.Router();
@@ -10,4 +10,4 @@ router.get(
   dashboardController.getUserDashboardData
 );
 
-export const dashboardRoutes = router;
+export const userDashboardRoutes = router;
