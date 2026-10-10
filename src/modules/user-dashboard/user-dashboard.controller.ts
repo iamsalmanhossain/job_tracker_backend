@@ -2,7 +2,7 @@ import type { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import { catchAsync } from '../../shared/catchAsync.js';
 import { sendResponse } from '../../shared/sendResponse.js';
-import { dashboardService } from './dashboard.service.js';
+import { dashboardService } from './user-dashboard.service.js';
 
 const getUserDashboardData = catchAsync(async (req: Request, res: Response) => {
   const userId = (req as any).user.id;

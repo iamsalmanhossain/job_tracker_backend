@@ -108,3 +108,10 @@ enum FileType {
   DOCUMENT
   OTHER
 }
+
+enum SupportTicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
