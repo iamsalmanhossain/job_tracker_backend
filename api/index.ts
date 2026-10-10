@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import app from '../src/app.js';
 import { connectRedis } from '../src/shared/redis.service.js';
 
