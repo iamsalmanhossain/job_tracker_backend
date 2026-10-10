@@ -17,6 +17,9 @@ export const authValidation = {
     otp: z.string(),
     email: z.string(),
   }),
+  resendOtp: z.object({
+    email: z.string(),
+  }),
   forgotPassword: z.object({
     email: z.string(),
   }),
@@ -42,6 +45,7 @@ export const authValidation = {
 export type TRegister = z.infer<typeof authValidation.register>;
 export type TLogin = z.infer<typeof authValidation.login>;
 export type TVerifyEmail = z.infer<typeof authValidation.verifyEmail>;
+export type TResendOtp = z.infer<typeof authValidation.resendOtp>;
 export type TForgotPassword = z.infer<typeof authValidation.forgotPassword>;
 export type TResetPassword = z.infer<typeof authValidation.resetPassword>;
 export type TUpdateProfile = z.infer<typeof authValidation.updateProfile>;

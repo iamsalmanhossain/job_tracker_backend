@@ -12,6 +12,7 @@ const register = catchAsync(async (req: Request, res: Response) => {
     message: 'User registered successfully. Please verify your email.',
     data: result,
   });
+  
 });
 
 const verifyEmail = catchAsync(async (req: Request, res: Response) => {
@@ -21,6 +22,16 @@ const verifyEmail = catchAsync(async (req: Request, res: Response) => {
     success: true,
     message: result.message,
     data: result.user,
+  });
+});
+
+const resendOtp = catchAsync(async (req: Request, res: Response) => {
+  const result = await authService.resendOtp(req.body.email);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: result.message,
+    data: null,
   });
 });
 
@@ -175,6 +186,7 @@ const adminLogin = catchAsync(async (req: Request, res: Response) => {
 export const authController = {
   register,
   verifyEmail,
+  resendOtp,
   login,
   googleLogin,
   forgotPassword,
