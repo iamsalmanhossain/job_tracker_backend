@@ -8,7 +8,8 @@ import { interviewRoutes } from '../modules/interview/interview.route.js';
 import { noteRoutes } from '../modules/note/note.route.js';
 import { followUpRoutes } from '../modules/follow-up/follow-up.route.js';
 import { notificationRoutes } from '../modules/notification/notification.route.js';
-import { dashboardRoutes } from '../modules/dashboard/dashboard.route.js';
+import { userDashboardRoutes } from '../modules/user-dashboard/user-dashboard.route.js';
+import { adminRoutes } from '../modules/admin/admin.route.js';
 
 const router:Router = express.Router();
 
@@ -46,8 +47,12 @@ const moduleRoutes = [
     route: notificationRoutes,
   },
   {
-    path: '/dashboard',
-    route: dashboardRoutes,
+    path: '/user-dashboard',
+    route: userDashboardRoutes,
+  },
+  {
+    path: '/admin',
+    route: adminRoutes,
   },
 ];
 
