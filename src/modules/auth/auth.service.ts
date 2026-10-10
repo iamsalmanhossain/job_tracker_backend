@@ -150,6 +150,24 @@ const verifyEmail = async (email: string, otp: string) => {
   return { message: 'Email verified successfully', user };
 };
 
+const resendOtp = async (email: string) => {
+  const user = await prisma.user.findUnique({ where: { email } });
+  
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+  }
+  
+  if (user.emailVerified) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'Email is already verified');
+  }
+
+  // Generate Redis OTP (2 minutes expiry) and send real email
+  const otp = await generateOtp(user.email, 'verify_email', 120);
+  await sendEmail(user.email, 'Verify your email address', emailTemplates.verificationEmail(otp));
+
+  return { message: 'OTP resent successfully' };
+};
+
 const login = async (data: TLogin & { ipAddress?: string; userAgent?: string }) => {
   const user = await prisma.user.findUnique({ where: { email: data.email } });
   if (!user || !user.password) {
@@ -425,6 +443,7 @@ const adminLogin = async (data: TLogin & { ipAddress?: string; userAgent?: strin
 export const authService = {
   register,
   verifyEmail,
+  resendOtp,
   login,
   googleLogin,
   forgotPassword,

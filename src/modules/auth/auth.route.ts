@@ -34,6 +34,13 @@ router.post(
 );
 
 router.post(
+  '/resend-otp',
+  authRateLimiter,
+  validateRequest(authValidation.resendOtp),
+  authController.resendOtp
+);
+
+router.post(
   '/forgot-password',
   authRateLimiter,
   validateRequest(authValidation.forgotPassword),
